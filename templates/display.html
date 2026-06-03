@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col space-y-6">
+    <div class="flex justify-between items-center border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Live Material Track Matrix</h1>
+            <p class="text-sm text-gray-400 mt-1">Real-time piece capacity balance metrics calculated for production assembly.</p>
+        </div>
+        <div class="flex items-center space-x-2 text-xs bg-gray-800 px-3 py-2 rounded border border-gray-700 font-mono">
+            <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span class="text-gray-400">Live Polling Status Engine Active</span>
+        </div>
+    </div>
+
+    <div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-6 bg-gray-800 rounded-lg animate-pulse text-center text-gray-500">
+            Querying production records and re-aggregating stock sets...
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function updateDashboardMetrics() {
+        try {
+            const response = await fetch(`/api/stock/data?t=${new Date().getTime()}`);
+            if (!response.ok) throw new Error("Network validation handshake failed.");
+            
+            const data = await response.json();
+            const gridContainer = document.getElementById('dashboard-grid');
+            gridContainer.innerHTML = ''; 
+
+            for (const [productId, product] of Object.entries(data)) {
+                const isHousingBottleneck = product.total_housings < product.total_covers;
+                const isCoverBottleneck = product.total_covers < product.total_housings;
+                
+                const productCardHTML = `
+                    <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6 flex flex-col space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold tracking-widest text-blue-400 font-mono uppercase">${productId}</span>
+                                <h2 class="text-xl font-bold text-white mt-0.5">${product.name}</h2>
+                            </div>
+                            <div class="bg-blue-900/40 border border-blue-700/50 rounded-lg px-4 py-2 text-center">
+                                <div class="text-xs text-blue-300 uppercase font-mono tracking-wider font-semibold">Assembly Ready</div>
+                                <div class="text-2xl font-black text-blue-400">${product.ready_sets.toLocaleString()} <span class="text-xs font-normal text-gray-400">sets</span></div>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-700/60">
+
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1 font-mono">
+                                    <span class="text-gray-400">Housings stock (${product.raw_pallet_count.housings} Pallets)</span>
+                                    <span class="font-bold ${isHousingBottleneck ? 'text-amber-400' : 'text-gray-200'}">
+                                        ${product.total_housings.toLocaleString()} Pcs ${isHousingBottleneck ? '⚠️ Min' : ''}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-900 rounded-full h-4 overflow-hidden p-0.5 border border-gray-700">
+                                    <div class="bg-indigo-500 h-full rounded-full transition-all duration-500" 
+                                         style="width: ${Math.min(100, (product.total_housings / Math.max(1, product.total_covers)) * 100)}%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-sm mb-1 font-mono">
+                                    <span class="text-gray-400">Covers stock (${product.raw_pallet_count.covers} Pallets)</span>
+                                    <span class="font-bold ${isCoverBottleneck ? 'text-amber-400' : 'text-gray-200'}">
+                                        ${product.total_covers.toLocaleString()} Pcs ${isCoverBottleneck ? '⚠️ Min' : ''}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-900 rounded-full h-4 overflow-hidden p-0.5 border border-gray-700">
+                                    <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+                                         style="width: ${Math.min(100, (product.total_covers / Math.max(1, product.total_housings)) * 100)}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                gridContainer.insertAdjacentHTML('beforeend', productCardHTML);
+            }
+        } catch (error) {
+            console.error("Dashboard calculation layout update exception context: ", error);
+        }
+    }
+
+    updateDashboardMetrics();
+    setInterval(updateDashboardMetrics, 5000);
+</script>
+{% endblock %}

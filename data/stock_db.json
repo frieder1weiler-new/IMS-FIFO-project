@@ -1,0 +1,123 @@
+{
+    "products": {
+        "PROD_A": {
+            "name": "Gearbox Type A",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "SAP-45039-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T20:19:46.775812"
+                    },
+                    {
+                        "batch_id": "SAP-11808-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T20:46:02.988080"
+                    },
+                    {
+                        "batch_id": "SAP-30332-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T20:53:58.866025"
+                    },
+                    {
+                        "batch_id": "SAP-40176-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T20:54:15.510883"
+                    },
+                    {
+                        "batch_id": "SAP-83787-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T21:30:45.459850"
+                    },
+                    {
+                        "batch_id": "SAP-76258-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T21:43:05.540021"
+                    },
+                    {
+                        "batch_id": "SAP-17506-H",
+                        "part_type": "housing",
+                        "quantity": 645,
+                        "timestamp": "2026-06-02T22:49:24.901227"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "SAP-64027-C",
+                        "part_type": "cover",
+                        "quantity": 1440,
+                        "timestamp": "2026-06-02T20:46:13.739049"
+                    }
+                ]
+            }
+        },
+        "PROD_B": {
+            "name": "Drive Unit B",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "SAP-10079-H",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-02T20:21:08.569853"
+                    },
+                    {
+                        "batch_id": "SAP-52808-H",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-02T20:21:26.911038"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "SAP-54906-C",
+                        "part_type": "cover",
+                        "quantity": 1200,
+                        "timestamp": "2026-06-02T20:21:18.332584"
+                    }
+                ]
+            }
+        },
+        "PROD_C": {
+            "name": "Subaru LH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "SAP-72601-H",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-02T22:52:56.271796"
+                    }
+                ],
+                "covers": []
+            }
+        },
+        "PROD_D": {
+            "name": "Subaru RH",
+            "stock": {
+                "housings": [],
+                "covers": []
+            }
+        },
+        "PROD_E": {
+            "name": "VW LH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "SAP-78217-H",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-02T22:57:34.852278"
+                    }
+                ],
+                "covers": []
+            }
+        }
+    }
+}

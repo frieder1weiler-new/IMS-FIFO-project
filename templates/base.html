@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Storage Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans flex flex-col min-h-screen">
+
+    <header class="bg-gray-800 border-b border-gray-700 shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl font-bold tracking-wider text-blue-500">📊 STOCK_VIZ</span>
+                <span class="text-xs bg-gray-700 text-gray-400 px-2 py-1 rounded font-mono">v1.0</span>
+            </div>
+            <nav class="flex space-x-4">
+                <a href="/" class="px-4 py-2 rounded-md hover:bg-gray-700 transition duration-150 ease-in-out font-medium">
+                    Monitor Dashboard
+                </a>
+                <a href="/management" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-sm transition duration-150 ease-in-out">
+                    ⚙️ Maintenance Mode
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-6 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 border-t border-gray-700 py-3 text-center text-xs text-gray-500 font-mono">
+        Warehouse Logistics Monitoring System • Connected to JSON Storage Engine
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

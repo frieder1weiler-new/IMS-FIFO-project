@@ -1,0 +1,30 @@
+{
+    "db_file_path": "data/stock_db.json",
+    "products": {
+        "PROD_A": {
+            "name": "Honda LH",
+            "housing_pallet_qty": 645,
+            "cover_pallet_qty": 1440
+        },
+        "PROD_B": {
+            "name": "Honda RH",
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1200
+        },
+        "PROD_C": {
+            "name": "Subaru LH",
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000
+        },
+        "PROD_D": {
+            "name": "Subaru RH",
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000
+        },
+        "PROD_E": {
+            "name": "VW LH",
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000
+        }
+    }
+}

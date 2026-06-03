@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hardware Scanner Interface Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-gray-400 font-mono min-h-screen flex flex-col justify-center items-center p-6 select-none">
+
+    <div class="max-w-xl w-full bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6 shadow-2xl">
+        <div class="text-center">
+            <h1 class="text-xl font-bold tracking-widest text-emerald-500">HEADLESS HARDWARE CAPTURE ACTIVE</h1>
+            <p class="text-xs text-gray-500 mt-1">Keep this tab open. Click anywhere on screen to re-focus interceptors.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div id="box-in" class="border border-blue-900/50 bg-blue-950/10 rounded-lg p-4 text-center">
+                <span class="text-xs font-bold text-blue-400 block mb-2">📥 INBOUND DISPATCH</span>
+                <textarea id="hw-scan-in-catcher" class="w-1 h-1 opacity-0 absolute pointer-events-none" autofocus></textarea>
+                <div id="in-state" class="text-sm font-bold text-blue-300 animate-pulse">WAITING PRODUCT...</div>
+                <div id="in-last-scan" class="text-[10px] text-gray-600 mt-2 truncate">No active session</div>
+            </div>
+
+            <div id="box-out" class="border border-red-900/50 bg-red-950/10 rounded-lg p-4 text-center">
+                <span class="text-xs font-bold text-red-400 block mb-2">📤 OUTBOUND REQUISITION</span>
+                <textarea id="hw-scan-out-catcher" class="w-1 h-1 opacity-0 absolute pointer-events-none"></textarea>
+                <div class="text-sm font-bold text-red-300">AWAITING BATCH ID...</div>
+                <div id="out-last-scan" class="text-[10px] text-gray-600 mt-2 truncate">Ready for pallet consume</div>
+            </div>
+        </div>
+        
+        <div id="terminal-feed" class="bg-black/40 border border-gray-800 rounded p-3 h-28 overflow-y-auto text-[10px] text-gray-500 space-y-1">
+            <div>[SYSTEM]: IO Input listeners initialized. Routing background data directly to database engine...</div>
+        </div>
+    </div>
+
+    <script>
+        const scanInCatcher = document.getElementById('hw-scan-in-catcher');
+        const scanOutCatcher = document.getElementById('hw-scan-out-catcher');
+        const termFeed = document.getElementById('terminal-feed');
+        
+        // State engine trackers for the dual-scan sequence
+        let currentInboundProduct = null;
+
+        // Auto-recovery focus router loop: keeps text inputs ready to catch data instantly
+        document.addEventListener('click', () => {
+            if (document.activeElement !== scanInCatcher && document.activeElement !== scanOutCatcher) {
+                scanInCatcher.focus(); 
+            }
+        });
+        
+        function trace(msg, status="info") {
+            const color = status === "success" ? "text-green-400" : (status === "error" ? "text-red-400" : "text-gray-500");
+            termFeed.insertAdjacentHTML('beforeend', `<div class="${color}">[${new Date().toLocaleTimeString()}] ${msg}</div>`);
+            termFeed.scrollTop = termFeed.scrollHeight;
+        }
+
+        // --- HARDWARE SCAN IN SEQUENCE (DUAL SCAN TRACKER) ---
+        scanInCatcher.addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const rawVal = this.value.trim();
+                this.value = ''; // Instantly clear text cache for next hardware trigger
+                if (!rawVal) return;
+
+                if (!currentInboundProduct) {
+                    // STEP 1: Process and Validate Product String Plausibility Check
+                    const splitIndex = rawVal.lastIndexOf('-');
+                    const prodId = splitIndex !== -1 ? rawVal.substring(0, splitIndex) : rawVal;
+                    const partType = splitIndex !== -1 ? rawVal.substring(splitIndex + 1).toLowerCase() : "";
+
+                    if (partType !== "housing" && partType !== "cover") {
+                        trace(`Plausibility Error: Invalid code pattern parsed: "${rawVal}". Missing type suffix.`, "error");
+                        document.getElementById('in-state').innerText = "❌ ERROR RESET";
+                        setTimeout(() => { document.getElementById('in-state').innerText = "WAITING PRODUCT..."; }, 2000);
+                        return;
+                    }
+
+                    // Set state machine flag to store product identity details
+                    currentInboundProduct = { id: prodId, type: partType };
+                    document.getElementById('in-state').innerText = "⚡ AWAIT BATCH ID";
+                    document.getElementById('in-last-scan').innerText = `Product: ${prodId} (${partType})`;
+                    trace(`Step 1 Complete: Validated target product entry [${prodId}]. Waiting for batch identifier sequence...`);
+                } else {
+                    // STEP 2: Process Batch ID entry against storage file record definitions
+                    const batchId = rawVal;
+                    trace(`Step 2 Target: Transmitting transaction for Batch: [${batchId}]...`);
+                    
+                    try {
+                        const response = await fetch('/api/scan/in', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                product_id: currentInboundProduct.id,
+                                part_type: currentInboundProduct.type,
+                                batch_id: batchId
+                            })
+                        });
+                        const resData = await response.json();
+                        
+                        if (response.ok) {
+                            trace(`Success: ${resData.message}`, "success");
+                        } else {
+                            trace(`Rejection: ${resData.message}`, "error");
+                        }
+                    } catch (err) {
+                        trace("Network processing error executing transaction", "error");
+                    }
+                    
+                    // Reset Inbound State Engine Loop back to Step 1
+                    currentInboundProduct = null;
+                    document.getElementById('in-state').innerText = "WAITING PRODUCT...";
+                }
+            }
+        });
+
+        // --- HARDWARE SCAN OUT SEQUENCE (SINGLE SCAN TRACKER) ---
+        scanOutCatcher.addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const batchId = this.value.trim();
+                this.value = '';
+                if (!batchId) return;
+
+                document.getElementById('out-last-scan').innerText = `Removing: ${batchId}`;
+                trace(`Outbound Requisition: Scanning inventory for removal lookup on [${batchId}]...`);
+
+                try {
+                    const response = await fetch('/api/scan/out', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ batch_id: batchId })
+                    });
+                    const resData = await response.json();
+                    
+                    if (response.ok) {
+                        trace(`Consumed: ${resData.message}`, "success");
+                    } else {
+                        trace(`Rejection: ${resData.message}`, "error");
+                    }
+                } catch (err) {
+                    trace("Network communication failure processing consumption scan.", "error");
+                }
+            }
+        });
+
+        // Split tracking strategy helper keys
+        window.addEventListener('keydown', (e) => {
+            // If F2 is pressed, switch hardware routing focus to Outbound Requisition, else fallback to Inbound
+            if (e.key === 'F2') {
+                e.preventDefault();
+                scanOutCatcher.focus();
+                document.getElementById('box-out').classList.add('border-red-500', 'bg-red-950/30');
+                document.getElementById('box-in').classList.remove('border-blue-500', 'bg-blue-950/30');
+                trace("System focus shifted manually to OUTBOUND receiver hook.");
+            } else if (e.key === 'F1') {
+                e.preventDefault();
+                scanInCatcher.focus();
+                document.getElementById('box-in').classList.add('border-blue-500', 'bg-blue-950/30');
+                document.getElementById('box-out').classList.remove('border-red-500', 'bg-red-950/30');
+                trace("System focus shifted manually to INBOUND receiver hook.");
+            }
+        });
+    </script>
+</body>
+</html>
