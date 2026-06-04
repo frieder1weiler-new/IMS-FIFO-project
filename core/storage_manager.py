@@ -14,10 +14,11 @@ def is_batch_id_duplicate(batch_id: str) -> bool:
     return False
 
 
-def book_pallet_in(product_id: str, part_type: str, batch_id: str) -> str:
+def book_pallet_in(product_id: str, part_type: str, batch_id: str, fifo_number: str = None) -> str:
     """
     Handles scanning a pallet into the system.
     Determines standard quantities automatically based on config.json.
+    Accepts fifo_number as the physical pallet label identifier.
     """
     config_path = "data/config.json"
     if os.path.exists(config_path):
@@ -27,7 +28,7 @@ def book_pallet_in(product_id: str, part_type: str, batch_id: str) -> str:
     else:
         registered_products = {}
 
-    # 🛠️ FIXED: Changed prod_id to product_id to match your function arguments
+    # FIXED: Changed prod_id to product_id to match function arguments
     if product_id not in registered_products:
         raise ValueError(f"Product ID '{product_id}' is not registered in config.json")
     
@@ -41,7 +42,7 @@ def book_pallet_in(product_id: str, part_type: str, batch_id: str) -> str:
         raise ValueError(f"Duplicate Scan Error: Batch ID '{batch_id}' is already registered in stock!")
 
     # 3. Pull quantities from configuration rules
-    # 🛠️ FIXED: Swapped static config module for the dynamic text file lookups we loaded above
+    # FIXED: Swapped static config module for the dynamic text file lookups we loaded above
     prod_config = registered_products[product_id]
     qty_key = "housing_pallet_qty" if part_type == "housing" else "cover_pallet_qty"
     

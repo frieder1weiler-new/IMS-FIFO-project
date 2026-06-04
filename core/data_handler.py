@@ -36,7 +36,7 @@ def get_product_stock(product_id: str) -> ProductStock:
     Fetches data from the JSON file and returns it as a ProductStock object.
     Auto-initializes the product entry if it exists in config but not in storage.
     """
-    # 🔄 DYNAMIC FIX: Read config.json directly from disk instead of memory config variables
+    # DYNAMIC FIX: Read config.json directly from disk instead of memory config variables
     if os.path.exists(CONFIG_FILE_PATH):
         try:
             with open(CONFIG_FILE_PATH, "r") as f:
@@ -67,11 +67,15 @@ def get_product_stock(product_id: str) -> ProductStock:
         save_raw_json(db_data) # Commit changes down to file instantly
     
     prod_data = products[product_id]
+    stock_data = prod_data.get("stock", {})
+    
+    # We pass the raw list of dicts directly. 
+    # ProductStock's __init__ will safely run [Pallet(**h) for h in housings] internally!
     return ProductStock(
         product_id=product_id,
         name=prod_data["name"],
-        housings=prod_data["stock"]["housings"],
-        covers=prod_data["stock"]["covers"]
+        housings=stock_data.get("housings", []),
+        covers=stock_data.get("covers", [])
     )
 
 
@@ -79,7 +83,7 @@ def save_product_stock(product_stock: ProductStock) -> None:
     """Saves a modified ProductStock object back into the JSON file."""
     db_data = load_raw_json()
     
-    # Update or insert the product data
+    # Update or insert the product data using the model's built-in to_dict serialization
     db_data.setdefault("products", {})[product_stock.product_id] = product_stock.to_dict()
     
     save_raw_json(db_data)

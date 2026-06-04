@@ -3,20 +3,24 @@ from typing import List, Dict, Any, Optional
 
 class Pallet:
     # We use Optional[str] so Python knows None is a valid default value
-    def __init__(self, batch_id: str, part_type: str, quantity: int, timestamp: Optional[str] = None):
+    def __init__(self, batch_id: str, part_type: str, quantity: int, timestamp: Optional[str] = None, fifo_number: Optional[str] = None):
         self.batch_id = batch_id          # Unique identifier from SAP scan
         self.part_type = part_type        # "housing" or "cover"
         self.quantity = quantity          # Pcs on this specific pallet
         self.timestamp = timestamp or datetime.now().isoformat()
+        self.fifo_number = str(fifo_number).strip() if fifo_number else None  # Physical label ID
 
     def to_dict(self) -> Dict[str, Any]:
         """Converts the Pallet object to a dictionary for JSON serialization."""
-        return {
+        result = {
             "batch_id": self.batch_id,
             "part_type": self.part_type,
             "quantity": self.quantity,
             "timestamp": self.timestamp
         }
+        if self.fifo_number:
+            result["fifo_number"] = self.fifo_number
+        return result
 
 
 class ProductStock:

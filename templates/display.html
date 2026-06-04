@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="flex flex-col space-y-6">
-    <div class="flex justify-between items-center border-b border-gray-800 pb-4">
+<div class="flex flex-col h-[calc(100vh-140px)] space-y-3 overflow-hidden">
+    <div class="flex justify-between items-center border-b border-gray-800 pb-2 shrink-0">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight">Live Material Track Matrix</h1>
-            <p class="text-sm text-gray-400 mt-1">Real-time piece capacity balance metrics calculated for production assembly.</p>
+            <h1 class="text-xl font-black tracking-tight text-white uppercase">Assembly Takeout Pick Queue (FIFO)</h1>
+            <p class="text-xs text-gray-400">Scan verification terminal. Consume the designated target batch IDs first.</p>
         </div>
-        <div class="flex items-center space-x-2 text-xs bg-gray-800 px-3 py-2 rounded border border-gray-700 font-mono">
-            <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span class="text-gray-400">Live Polling Status Engine Active</span>
+        <div class="flex items-center space-x-2 text-xs bg-gray-800 px-3 py-1 rounded border border-gray-700 font-mono">
+            <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span class="text-gray-400 font-bold">FIFO ENFORCEMENT ON</span>
         </div>
     </div>
 
-    <div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="p-6 bg-gray-800 rounded-lg animate-pulse text-center text-gray-500">
-            Querying production records and re-aggregating stock sets...
+    <div id="fifo-takeout-grid" class="flex flex-row flex-wrap gap-4 flex-1 w-full overflow-hidden items-stretch content-stretch">
+        <div class="p-4 bg-gray-800 rounded-lg animate-pulse text-center text-gray-500 w-full flex items-center justify-center">
+            Loading next-up FIFO queues from raw storage engine...
         </div>
     </div>
 </div>
@@ -23,71 +23,91 @@
 
 {% block scripts %}
 <script>
-    async function updateDashboardMetrics() {
+    async function updateFifoTakeoutDashboard() {
         try {
-            const response = await fetch(`/api/stock/data?t=${new Date().getTime()}`);
-            if (!response.ok) throw new Error("Network validation handshake failed.");
+            const stockRes = await fetch(`/api/stock/data?t=${new Date().getTime()}`);
+            const fifoRes = await fetch(`/api/stock/takeout-fifo?t=${new Date().getTime()}`);
+            if (!stockRes.ok || !fifoRes.ok) return;
+
+            const stockData = await stockRes.json();
+            const fifoData = await fifoRes.json();
             
-            const data = await response.json();
-            const gridContainer = document.getElementById('dashboard-grid');
+            const gridContainer = document.getElementById('fifo-takeout-grid');
             gridContainer.innerHTML = ''; 
 
-            for (const [productId, product] of Object.entries(data)) {
-                const isHousingBottleneck = product.total_housings < product.total_covers;
-                const isCoverBottleneck = product.total_covers < product.total_housings;
-                
-                const productCardHTML = `
-                    <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6 flex flex-col space-y-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-bold tracking-widest text-blue-400 font-mono uppercase">${productId}</span>
-                                <h2 class="text-xl font-bold text-white mt-0.5">${product.name}</h2>
-                            </div>
-                            <div class="bg-blue-900/40 border border-blue-700/50 rounded-lg px-4 py-2 text-center">
-                                <div class="text-xs text-blue-300 uppercase font-mono tracking-wider font-semibold">Assembly Ready</div>
-                                <div class="text-2xl font-black text-blue-400">${product.ready_sets.toLocaleString()} <span class="text-xs font-normal text-gray-400">sets</span></div>
-                            </div>
+            const stockMap = {};
+            Object.values(stockData).forEach(p => {
+                stockMap[p.name] = p.ready_sets;
+            });
+
+            const basisClass = fifoData.length <= 3 ? 'flex-1 min-w-[30%]' : 'w-[48%] flex-grow';
+
+            fifoData.forEach(product => {
+                const hBatch = product.oldest_housing;
+                const cBatch = product.oldest_cover;
+                const completeSets = stockMap[product.name] !== undefined ? stockMap[product.name] : 0;
+
+                const housingBlockHTML = hBatch ? `
+                    <div class="bg-gray-900 border-l-4 border-indigo-500 px-4 py-3 rounded-r flex flex-row justify-between items-center flex-1 gap-2">
+                        <div class="flex flex-col justify-center min-w-[120px]">
+                            <div class="text-[10px] uppercase font-black text-indigo-400 font-mono tracking-wider">Next Housing Pallet</div>
+                            <div class="text-sm font-bold text-gray-100 font-mono mt-0.5">Qty: <b class="text-white">${hBatch.qty} pcs</b></div>
+                            <div class="text-[10px] text-gray-500 font-mono mt-0.5">${hBatch.timestamp.split(" ")[1] || ''}</div>
                         </div>
+                        <div class="flex items-center justify-end gap-1 flex-1 select-all">
+                            ${hBatch.fifo_number ? `<span class="text-3xl font-black text-amber-400 font-mono tracking-wider">${hBatch.fifo_number}</span>` : ''}
+                            <span class="text-3xl font-light text-gray-500">${hBatch.fifo_number ? ';' : ''}</span>
+                            <span class="text-3xl font-normal text-gray-200 font-mono tracking-wider truncate">${hBatch.batch_id}</span>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="bg-gray-900/50 border border-dashed border-gray-800 rounded px-3 py-4 text-center text-gray-600 text-xs font-mono flex items-center justify-center flex-1">
+                        HOUSINGS DEPLETED
+                    </div>
+                `;
 
-                        <hr class="border-gray-700/60">
+                const coverBlockHTML = cBatch ? `
+                    <div class="bg-gray-900 border-l-4 border-purple-500 px-4 py-3 rounded-r flex flex-row justify-between items-center flex-1 gap-2">
+                        <div class="flex flex-col justify-center min-w-[120px]">
+                            <div class="text-[10px] uppercase font-black text-purple-400 font-mono tracking-wider">Next Cover Pallet</div>
+                            <div class="text-sm font-bold text-gray-100 font-mono mt-0.5">Qty: <b class="text-white">${cBatch.qty} pcs</b></div>
+                            <div class="text-[10px] text-gray-500 font-mono mt-0.5">${cBatch.timestamp.split(" ")[1] || ''}</div>
+                        </div>
+                        <div class="flex items-center justify-end gap-1 flex-1 select-all">
+                            ${cBatch.fifo_number ? `<span class="text-3xl font-black text-purple-400 font-mono tracking-wider">${cBatch.fifo_number}</span>` : ''}
+                            <span class="text-3xl font-light text-gray-500">${cBatch.fifo_number ? ';' : ''}</span>
+                            <span class="text-3xl font-normal text-gray-200 font-mono tracking-wider truncate">${cBatch.batch_id}</span>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="bg-gray-900/50 border border-dashed border-gray-800 rounded px-3 py-4 text-center text-gray-600 text-xs font-mono flex items-center justify-center flex-1">
+                        COVERS DEPLETED
+                    </div>
+                `;
 
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-sm mb-1 font-mono">
-                                    <span class="text-gray-400">Housings stock (${product.raw_pallet_count.housings} Pallets)</span>
-                                    <span class="font-bold ${isHousingBottleneck ? 'text-amber-400' : 'text-gray-200'}">
-                                        ${product.total_housings.toLocaleString()} Pcs ${isHousingBottleneck ? '⚠️ Min' : ''}
-                                    </span>
-                                </div>
-                                <div class="w-full bg-gray-900 rounded-full h-4 overflow-hidden p-0.5 border border-gray-700">
-                                    <div class="bg-indigo-500 h-full rounded-full transition-all duration-500" 
-                                         style="width: ${Math.min(100, (product.total_housings / Math.max(1, product.total_covers)) * 100)}%"></div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="flex justify-between text-sm mb-1 font-mono">
-                                    <span class="text-gray-400">Covers stock (${product.raw_pallet_count.covers} Pallets)</span>
-                                    <span class="font-bold ${isCoverBottleneck ? 'text-amber-400' : 'text-gray-200'}">
-                                        ${product.total_covers.toLocaleString()} Pcs ${isCoverBottleneck ? '⚠️ Min' : ''}
-                                    </span>
-                                </div>
-                                <div class="w-full bg-gray-900 rounded-full h-4 overflow-hidden p-0.5 border border-gray-700">
-                                    <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                                         style="width: ${Math.min(100, (product.total_covers / Math.max(1, product.total_housings)) * 100)}%"></div>
-                                </div>
-                            </div>
+                const cardHTML = `
+                    <div class="${basisClass} bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between shadow-md">
+                        <div class="flex justify-between items-baseline border-b border-gray-700 pb-2 mb-2 shrink-0">
+                            <h2 class="text-base font-black text-white tracking-tight uppercase truncate max-w-[200px]">${product.name}</h2>
+                            <span class="text-xs font-bold text-emerald-400 bg-emerald-950 border border-emerald-900 px-2 py-0.5 rounded font-mono">
+                                ${completeSets.toLocaleString()} <span class="text-[9px] font-normal text-gray-400">SETS</span>
+                            </span>
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col gap-3 justify-stretch">
+                            ${housingBlockHTML}
+                            ${coverBlockHTML}
                         </div>
                     </div>
                 `;
-                gridContainer.insertAdjacentHTML('beforeend', productCardHTML);
-            }
+                gridContainer.insertAdjacentHTML('beforeend', cardHTML);
+            });
         } catch (error) {
-            console.error("Dashboard calculation layout update exception context: ", error);
+            console.error("Failed handling real-time FIFO extraction loop:", error);
         }
     }
 
-    updateDashboardMetrics();
-    setInterval(updateDashboardMetrics, 5000);
+    updateFifoTakeoutDashboard();
+    setInterval(updateFifoTakeoutDashboard, 4000);
 </script>
 {% endblock %}

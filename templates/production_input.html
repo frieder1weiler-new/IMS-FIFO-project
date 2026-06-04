@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col h-[calc(100vh-140px)] space-y-3 overflow-hidden px-1">
+    
+    <div class="flex justify-between items-center border-b border-gray-800 pb-2 shrink-0">
+        <div>
+            <h1 class="text-xl font-black tracking-tight text-white uppercase">Production Matrix</h1>
+            <p class="text-xs text-gray-400">Live column-based component buffer tracking for shop floor line operators.</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-700 px-3 py-1 rounded font-mono text-xs flex items-center space-x-2">
+            <span class="h-2 w-2 rounded-full bg-indigo-500 animate-ping"></span>
+            <span class="text-gray-300 font-bold">LIVE BALANCER ACTIVE</span>
+        </div>
+    </div>
+
+    <div id="production-input-grid" class="flex flex-row gap-6 flex-1 w-full overflow-hidden items-stretch justify-start">
+        <div class="p-4 bg-gray-800 rounded-xl text-center text-gray-500 w-full flex items-center justify-center animate-pulse">
+            Constructing vertical tracking columns...
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function updateProductionInputDashboard() {
+        try {
+            const response = await fetch(`/api/stock/data?t=${new Date().getTime()}`);
+            if (!response.ok) return;
+            const data = await response.json();
+            
+            const gridContainer = document.getElementById('production-input-grid');
+            gridContainer.innerHTML = '';
+
+            const productEntries = Object.entries(data);
+            if (productEntries.length === 0) return;
+
+            for (const [productId, product] of productEntries) {
+                const totalH = product.total_housings;
+                const totalC = product.total_covers;
+                const palletH = product.raw_pallet_count.housings;
+                const palletC = product.raw_pallet_count.covers;
+                const totalPallets = palletH + palletC;
+                
+                // Extract thresholds from product config
+                const isActive = product.is_active !== false;
+                const minStockPcs = product.thresholds.min_stock_pcs || 1000;
+                const maxStockPcs = product.thresholds.max_stock_pcs || 5000;
+                const housingPalletQty = product.thresholds.housing_pallet_qty || 500;
+                const coverPalletQty = product.thresholds.cover_pallet_qty || 1000;
+                
+                // Calculate pallet thresholds
+                const minPalletThreshold = minStockPcs / ((housingPalletQty + coverPalletQty) / 2);
+                const maxPalletThreshold = maxStockPcs / ((housingPalletQty + coverPalletQty) / 2);
+                
+                // Determine alarm state based on total pieces
+                let alarmState = 'normal'; // 'low', 'high', 'disabled'
+                if (!isActive) {
+                    alarmState = 'disabled';
+                } else if (totalH + totalC <= minStockPcs) {
+                    alarmState = 'low';
+                } else if (totalH + totalC >= maxStockPcs) {
+                    alarmState = 'high';
+                }
+                
+                // Color-coded Demand Indicators
+                let demandStatusHTML = '';
+                if (totalH === 0 && totalC === 0) {
+                    demandStatusHTML = `<div class="bg-gray-900 border border-gray-800 text-gray-500 text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center">EMPTY DEPOT</div>`;
+                } else if (totalH < totalC) {
+                    demandStatusHTML = `<div class="bg-indigo-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center border border-indigo-400 animate-pulse">⚠️ DEMAND: HOUSINGS</div>`;
+                } else if (totalC < totalH) {
+                    demandStatusHTML = `<div class="bg-purple-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center border border-purple-400 animate-pulse">🔮 DEMAND: COVERS</div>`;
+                } else {
+                    demandStatusHTML = `<div class="bg-emerald-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center">⚖️ BUFFER BALANCED</div>`;
+                }
+
+                // Calculate heights for the vertical pillars based on whichever has more stock
+                const maxPallets = Math.max(1, palletH, palletC);
+                const hPillarHeight = (palletH / maxPallets) * 100;
+                const cPillarHeight = (palletC / maxPallets) * 100;
+
+                // Determine card styling based on alarm state
+                let cardAlertClasses = "bg-gray-950 border-gray-800"; 
+                let cardOverlayHTML = '';
+                
+                if (alarmState === 'low') {
+                    cardAlertClasses = "bg-red-950/80 border-red-500 animate-pulse";
+                } else if (alarmState === 'high') {
+                    cardAlertClasses = "bg-gray-950 opacity-40 border-dashed border-gray-600 animate-pulse";
+                } else if (alarmState === 'disabled') {
+                    cardAlertClasses = "bg-gray-950 opacity-30 border-gray-700";
+                    cardOverlayHTML = `
+                        <div class="absolute inset-0 bg-gray-900/70 flex items-center justify-center rounded-2xl z-40 pointer-events-none">
+                            <div class="text-center">
+                                <div class="text-2xl font-black text-gray-400 mb-1">⛔</div>
+                                <div class="text-sm font-black text-gray-400 tracking-wider">LINE PRODUCTION</div>
+                                <div class="text-sm font-black text-gray-400 tracking-wider">DISABLED</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // CHANGED: Shifted padding from 'p-4' to 'p-2' to broaden the inner columns wide across the window frame
+                const columnCardHTML = `
+                    <div id="card-${productId}" class="flex-1 min-w-[200px] ${cardAlertClasses} border-2 rounded-2xl p-2 flex flex-col justify-between shadow-2xl transition-all duration-300 relative">
+                        ${cardOverlayHTML}
+                        
+                        <div class="shrink-0 text-center border-b border-gray-800/80 pb-1 ${alarmState === 'disabled' ? 'opacity-50' : ''}">
+                            <h2 class="text-2xl font-black text-white uppercase tracking-tight line-clamp-1">${product.name}</h2>
+                        </div>
+
+                        <div class="mt-2 shrink-0">
+                            ${demandStatusHTML}
+                        </div>
+
+                        <div class="shrink-0 flex justify-between items-center px-2 py-1 mt-2 bg-gray-900/60 rounded-lg border border-gray-900/40 font-mono ${alarmState === 'disabled' ? 'opacity-50' : ''}">
+                            <span class="text-[10px] tracking-wider font-bold text-gray-400 uppercase">Total Pallets:</span>
+                            <span class="text-sm font-black text-white">${totalPallets} <span class="text-[10px] font-normal text-gray-500">(${(totalH + totalC).toLocaleString()} Pcs)</span></span>
+                        </div>
+
+                        <div class="flex-1 grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-800/60 items-stretch overflow-hidden ${alarmState === 'disabled' ? 'opacity-50' : ''}">
+                            
+                            <div class="flex flex-col justify-end bg-gray-900/40 border border-gray-900 rounded-xl p-1.5 relative overflow-hidden group">
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-indigo-700 via-indigo-500 to-indigo-400 transition-all duration-700 ease-out rounded-b-xl" style="height: ${hPillarHeight}%"></div>
+                                
+                                <div class="relative z-10 text-center flex flex-col justify-between h-full mix-blend-lighten">
+                                    <div class="text-[10px] font-black tracking-widest text-indigo-300 uppercase font-mono">Housings</div>
+                                    <div class="mt-auto">
+                                        <div class="text-4xl font-black text-white font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">${palletH}</div>
+                                        <div class="text-[9px] font-bold text-gray-300 font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] truncate">${totalH.toLocaleString()} Pcs</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="relative z-20 mt-1 bg-indigo-700/40 border border-indigo-500/50 rounded-md px-1 py-0.5 text-center">
+                                    <div class="text-[8px] font-bold text-indigo-200 font-mono tracking-wider">
+                                        ${product.next_fifo_numbers?.housing ? `#${product.next_fifo_numbers.housing} NEXT` : 'EMPTY'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col justify-end bg-gray-900/40 border border-gray-900 rounded-xl p-1.5 relative overflow-hidden group">
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-700 via-purple-500 to-purple-400 transition-all duration-700 ease-out rounded-b-xl" style="height: ${cPillarHeight}%"></div>
+                                
+                                <div class="relative z-10 text-center flex flex-col justify-between h-full mix-blend-lighten">
+                                    <div class="text-[10px] font-black tracking-widest text-purple-300 uppercase font-mono">Covers</div>
+                                    <div class="mt-auto">
+                                        <div class="text-4xl font-black text-white font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">${palletC}</div>
+                                        <div class="text-[9px] font-bold text-gray-300 font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] truncate">${totalC.toLocaleString()} Pcs</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="relative z-20 mt-1 bg-purple-700/40 border border-purple-500/50 rounded-md px-1 py-0.5 text-center">
+                                    <div class="text-[8px] font-bold text-purple-200 font-mono tracking-wider">
+                                        ${product.next_fifo_numbers?.cover ? `#${product.next_fifo_numbers.cover} NEXT` : 'EMPTY'}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+                gridContainer.insertAdjacentHTML('beforeend', columnCardHTML);
+            }
+        } catch (error) {
+            console.error("Failed pulling core buffer metrics:", error);
+        }
+    }
+
+    updateProductionInputDashboard();
+    setInterval(updateProductionInputDashboard, 4000);
+</script>
+{% endblock %}
