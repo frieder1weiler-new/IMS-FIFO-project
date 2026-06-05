@@ -41,7 +41,6 @@
                 const totalC = product.total_covers;
                 const palletH = product.raw_pallet_count.housings;
                 const palletC = product.raw_pallet_count.covers;
-                const totalPallets = palletH + palletC;
                 
                 // Extract thresholds from product config
                 const isActive = product.is_active !== false;
@@ -50,45 +49,68 @@
                 const housingPalletQty = product.thresholds.housing_pallet_qty || 500;
                 const coverPalletQty = product.thresholds.cover_pallet_qty || 1000;
                 
-                // Calculate pallet thresholds
-                const minPalletThreshold = minStockPcs / ((housingPalletQty + coverPalletQty) / 2);
-                const maxPalletThreshold = maxStockPcs / ((housingPalletQty + coverPalletQty) / 2);
+                // Calculate matching 1:1 pairs available to assemble
+                const readyAssemblySets = Math.min(totalH, totalC);
+
+                // Convert matching sets to full pallets based on housing pallet layout size
+                const totalPallets = Math.max(0, Math.floor(readyAssemblySets / housingPalletQty));
                 
+                // INDIVIDUAL MIN/MAX THRESHOLDS (50/50 splits)
+                const minHousingPcs = minStockPcs / 2;
+                const minCoverPcs = minStockPcs / 2;
+                const maxHousingPcs = maxStockPcs / 2;
+                const maxCoverPcs = maxStockPcs / 2;
+
+                // 🛠️ FIX: Calculate separate 120% visual ceilings for each individual pillar 
+                const housingCeilingPcs = maxHousingPcs * 1.2;
+                const coverCeilingPcs = maxCoverPcs * 1.2;
+
+                // Determine individual element state color sets
+                const housingIsLow = totalH < minHousingPcs;
+                const coverIsLow = totalC < minCoverPcs;
+                
+                const housingIsMaxed = totalH >= maxHousingPcs;
+                const coverIsMaxed = totalC >= maxCoverPcs;
+
                 // Determine alarm state based on total pieces
-                let alarmState = 'normal'; // 'low', 'high', 'disabled'
+                let alarmState = 'normal'; 
                 if (!isActive) {
                     alarmState = 'disabled';
                 } else if (totalH + totalC <= minStockPcs) {
-                    alarmState = 'low';
+                    alarmState = 'low'; 
                 } else if (totalH + totalC >= maxStockPcs) {
                     alarmState = 'high';
                 }
                 
-                // Color-coded Demand Indicators
+                // Demand Indicators
                 let demandStatusHTML = '';
                 if (totalH === 0 && totalC === 0) {
                     demandStatusHTML = `<div class="bg-gray-900 border border-gray-800 text-gray-500 text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center">EMPTY DEPOT</div>`;
                 } else if (totalH < totalC) {
-                    demandStatusHTML = `<div class="bg-indigo-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center border border-indigo-400 animate-pulse">⚠️ DEMAND: HOUSINGS</div>`;
+                    demandStatusHTML = `<div class="bg-indigo-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center border border-indigo-400">⚠️ DEMAND: HOUSINGS</div>`;
                 } else if (totalC < totalH) {
-                    demandStatusHTML = `<div class="bg-purple-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center border border-purple-400 animate-pulse">🔮 DEMAND: COVERS</div>`;
+                    demandStatusHTML = `<div class="bg-purple-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center border border-purple-400">🔮 DEMAND: COVERS</div>`;
                 } else {
                     demandStatusHTML = `<div class="bg-emerald-600 text-white text-xs py-1 rounded-lg font-black tracking-wider uppercase text-center">⚖️ BUFFER BALANCED</div>`;
                 }
 
-                // Calculate heights for the vertical pillars based on whichever has more stock
-                const maxPallets = Math.max(1, palletH, palletC);
-                const hPillarHeight = (palletH / maxPallets) * 100;
-                const cPillarHeight = (palletC / maxPallets) * 100;
+                // 🛠️ FIX: Calculate visual fill heights scaled against their own component ceiling
+                const hPillarHeight = Math.min(100, (totalH / housingCeilingPcs) * 100);
+                const cPillarHeight = Math.min(100, (totalC / coverCeilingPcs) * 100);
 
-                // Determine card styling based on alarm state
+                // 🛠️ FIX: Calculate absolute position percentages relative to their own component ceiling
+                // This ensures the MAX line is pushed up to exactly 83.3% height in both columns
+                const hMinLinePos = (minHousingPcs / housingCeilingPcs) * 100;
+                const hMaxLinePos = (maxHousingPcs / housingCeilingPcs) * 100;
+                
+                const cMinLinePos = (minCoverPcs / coverCeilingPcs) * 100;
+                const cMaxLinePos = (maxCoverPcs / coverCeilingPcs) * 100;
+
                 let cardAlertClasses = "bg-gray-950 border-gray-800"; 
                 let cardOverlayHTML = '';
                 
                 if (alarmState === 'low') {
-                    cardAlertClasses = "bg-red-950/80 border-red-500 animate-pulse";
-                } else if (alarmState === 'high') {
-                    cardAlertClasses = "bg-gray-950 opacity-40 border-dashed border-gray-600 animate-pulse";
+                    cardAlertClasses = "bg-red-950/40 border-red-900"; 
                 } else if (alarmState === 'disabled') {
                     cardAlertClasses = "bg-gray-950 opacity-30 border-gray-700";
                     cardOverlayHTML = `
@@ -102,7 +124,20 @@
                     `;
                 }
 
-                // CHANGED: Shifted padding from 'p-4' to 'p-2' to broaden the inner columns wide across the window frame
+                let housingPillarClasses = 'bg-gray-900/40 border-gray-900';
+                if (housingIsMaxed) {
+                    housingPillarClasses = 'bg-gray-900/20 border-gray-700 opacity-60';
+                } else if (housingIsLow) {
+                    housingPillarClasses = 'bg-red-950/30 border-red-500 border-2 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.15)]';
+                }
+
+                let coverPillarClasses = 'bg-gray-900/40 border-gray-900';
+                if (coverIsMaxed) {
+                    coverPillarClasses = 'bg-gray-900/20 border-gray-700 opacity-60';
+                } else if (coverIsLow) {
+                    coverPillarClasses = 'bg-red-950/30 border-red-500 border-2 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.15)]';
+                }
+
                 const columnCardHTML = `
                     <div id="card-${productId}" class="flex-1 min-w-[200px] ${cardAlertClasses} border-2 rounded-2xl p-2 flex flex-col justify-between shadow-2xl transition-all duration-300 relative">
                         ${cardOverlayHTML}
@@ -116,42 +151,72 @@
                         </div>
 
                         <div class="shrink-0 flex justify-between items-center px-2 py-1 mt-2 bg-gray-900/60 rounded-lg border border-gray-900/40 font-mono ${alarmState === 'disabled' ? 'opacity-50' : ''}">
-                            <span class="text-[10px] tracking-wider font-bold text-gray-400 uppercase">Total Pallets:</span>
-                            <span class="text-sm font-black text-white">${totalPallets} <span class="text-[10px] font-normal text-gray-500">(${(totalH + totalC).toLocaleString()} Pcs)</span></span>
+                            <span class="text-[10px] tracking-wider font-bold text-gray-400 uppercase">Ready Pallets (Sets):</span>
+                            <span class="text-sm font-black text-emerald-400">${totalPallets} <span class="text-[10px] font-normal text-gray-500">(${readyAssemblySets.toLocaleString()} Sets)</span></span>
                         </div>
 
                         <div class="flex-1 grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-800/60 items-stretch overflow-hidden ${alarmState === 'disabled' ? 'opacity-50' : ''}">
                             
-                            <div class="flex flex-col justify-end bg-gray-900/40 border border-gray-900 rounded-xl p-1.5 relative overflow-hidden group">
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-indigo-700 via-indigo-500 to-indigo-400 transition-all duration-700 ease-out rounded-b-xl" style="height: ${hPillarHeight}%"></div>
+                            <div class="flex flex-col justify-between border rounded-xl p-1.5 relative overflow-hidden group transition-all duration-300 ${housingPillarClasses}">
+                                <div class="absolute bottom-0 left-0 right-0 transition-all duration-700 ease-out rounded-b-xl z-0 ${housingIsMaxed ? 'bg-gradient-to-t from-gray-700 via-gray-600 to-gray-500' : 'bg-gradient-to-t from-indigo-700 via-indigo-500 to-indigo-400'}" style="height: ${hPillarHeight}%"></div>
                                 
-                                <div class="relative z-10 text-center flex flex-col justify-between h-full mix-blend-lighten">
-                                    <div class="text-[10px] font-black tracking-widest text-indigo-300 uppercase font-mono">Housings</div>
-                                    <div class="mt-auto">
-                                        <div class="text-4xl font-black text-white font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">${palletH}</div>
-                                        <div class="text-[9px] font-bold text-gray-300 font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] truncate">${totalH.toLocaleString()} Pcs</div>
+                                <div class="absolute left-0 right-0 border-t-2 border-dashed border-amber-500/60 z-10 pointer-events-none flex justify-end" style="bottom: ${hMaxLinePos}%">
+                                    <span class="text-[7px] font-mono font-bold text-amber-400 bg-gray-950/80 px-1 rounded-bl select-none uppercase tracking-tighter">MAX</span>
+                                </div>
+                                <div class="absolute left-0 right-0 border-t-2 border-dashed border-red-500/60 z-10 pointer-events-none flex justify-end" style="bottom: ${hMinLinePos}%">
+                                    <span class="text-[7px] font-mono font-bold text-red-400 bg-gray-950/80 px-1 rounded-bl select-none uppercase tracking-tighter">MIN</span>
+                                </div>
+
+                                <div class="relative z-20 text-center mix-blend-lighten">
+                                    <div class="text-[20px] font-black tracking-widest uppercase font-mono ${housingIsMaxed ? 'text-gray-400' : 'text-indigo-300'}">Housings</div>
+                                </div>
+
+                                <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none mix-blend-lighten">
+                                    ${housingIsMaxed ? '<div class="text-2xl mb-0.5 animate-bounce drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">⛔</div>' : ''}
+                                    <div class="text-5xl font-black font-mono drop-shadow-[0_4px_6px_rgba(0,0,0,0.95)] ${housingIsLow ? 'text-red-500 font-extrabold scale-110' : housingIsMaxed ? 'text-gray-400 line-through decoration-gray-500' : 'text-white'}">${palletH}</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-widest font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] ${housingIsLow ? 'text-red-400 text-xs' : housingIsMaxed ? 'text-gray-400' : 'text-indigo-200'}">
+                                        ${housingIsMaxed ? 'MAXED OUT' : 'Pallets'}
                                     </div>
                                 </div>
+
+                                <div class="relative z-20 text-center mt-auto mb-1 mix-blend-lighten">
+                                    <div class="text-[10px] font-extrabold font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate ${housingIsLow ? 'text-red-300 text-xs font-black' : housingIsMaxed ? 'text-gray-400' : 'text-gray-200'}">${totalH.toLocaleString()} Pcs</div>
+                                </div>
                                 
-                                <div class="relative z-20 mt-1 bg-indigo-700/40 border border-indigo-500/50 rounded-md px-1 py-0.5 text-center">
+                                <div class="relative z-30 mt-1 bg-indigo-700/40 border border-indigo-500/50 rounded-md px-1 py-0.5 text-center ${housingIsMaxed ? 'opacity-40 grayscale' : ''}">
                                     <div class="text-[8px] font-bold text-indigo-200 font-mono tracking-wider">
                                         ${product.next_fifo_numbers?.housing ? `#${product.next_fifo_numbers.housing} NEXT` : 'EMPTY'}
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col justify-end bg-gray-900/40 border border-gray-900 rounded-xl p-1.5 relative overflow-hidden group">
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-700 via-purple-500 to-purple-400 transition-all duration-700 ease-out rounded-b-xl" style="height: ${cPillarHeight}%"></div>
+                            <div class="flex flex-col justify-between border rounded-xl p-1.5 relative overflow-hidden group transition-all duration-300 ${coverPillarClasses}">
+                                <div class="absolute bottom-0 left-0 right-0 transition-all duration-700 ease-out rounded-b-xl z-0 ${coverIsMaxed ? 'bg-gradient-to-t from-gray-700 via-gray-600 to-gray-500' : 'bg-gradient-to-t from-purple-700 via-purple-500 to-purple-400'}" style="height: ${cPillarHeight}%"></div>
                                 
-                                <div class="relative z-10 text-center flex flex-col justify-between h-full mix-blend-lighten">
-                                    <div class="text-[10px] font-black tracking-widest text-purple-300 uppercase font-mono">Covers</div>
-                                    <div class="mt-auto">
-                                        <div class="text-4xl font-black text-white font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">${palletC}</div>
-                                        <div class="text-[9px] font-bold text-gray-300 font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] truncate">${totalC.toLocaleString()} Pcs</div>
+                                <div class="absolute left-0 right-0 border-t-2 border-dashed border-amber-500/60 z-10 pointer-events-none flex justify-end" style="bottom: ${cMaxLinePos}%">
+                                    <span class="text-[7px] font-mono font-bold text-amber-400 bg-gray-950/80 px-1 rounded-bl select-none uppercase tracking-tighter">MAX</span>
+                                </div>
+                                <div class="absolute left-0 right-0 border-t-2 border-dashed border-red-500/60 z-10 pointer-events-none flex justify-end" style="bottom: ${cMinLinePos}%">
+                                    <span class="text-[7px] font-mono font-bold text-red-400 bg-gray-950/80 px-1 rounded-bl select-none uppercase tracking-tighter">MIN</span>
+                                </div>
+
+                                <div class="relative z-20 text-center mix-blend-lighten">
+                                    <div class="text-[20px] font-black tracking-widest uppercase font-mono ${coverIsMaxed ? 'text-gray-400' : 'text-purple-300'}">Covers</div>
+                                </div>
+
+                                <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none mix-blend-lighten">
+                                    ${coverIsMaxed ? '<div class="text-2xl mb-0.5 animate-bounce drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">⛔</div>' : ''}
+                                    <div class="text-5xl font-black font-mono drop-shadow-[0_4px_6px_rgba(0,0,0,0.95)] ${coverIsLow ? 'text-red-500 font-extrabold scale-110' : coverIsMaxed ? 'text-gray-400 line-through decoration-gray-500' : 'text-white'}">${palletC}</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-widest font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] ${coverIsLow ? 'text-red-400 text-xs' : coverIsMaxed ? 'text-gray-400' : 'text-purple-200'}">
+                                        ${coverIsMaxed ? 'MAXED OUT' : 'Pallets'}
                                     </div>
                                 </div>
+
+                                <div class="relative z-20 text-center mt-auto mb-1 mix-blend-lighten">
+                                    <div class="text-[10px] font-extrabold font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate ${coverIsLow ? 'text-red-300 text-xs font-black' : coverIsMaxed ? 'text-gray-400' : 'text-gray-200'}">${totalC.toLocaleString()} Pcs</div>
+                                </div>
                                 
-                                <div class="relative z-20 mt-1 bg-purple-700/40 border border-purple-500/50 rounded-md px-1 py-0.5 text-center">
+                                <div class="relative z-30 mt-1 bg-purple-700/40 border border-purple-500/50 rounded-md px-1 py-0.5 text-center ${coverIsMaxed ? 'opacity-40 grayscale' : ''}">
                                     <div class="text-[8px] font-bold text-purple-200 font-mono tracking-wider">
                                         ${product.next_fifo_numbers?.cover ? `#${product.next_fifo_numbers.cover} NEXT` : 'EMPTY'}
                                     </div>

@@ -33,9 +33,28 @@ class ProductStock:
         self.product_id = product_id
         self.name = name
         
-        # The logic inside remains safe from mutable default argument bugs
-        self.housings = [Pallet(**h) for h in (housings or [])]
-        self.covers = [Pallet(**c) for c in (covers or [])]
+        # FIX: Safe extraction instead of direct ** unpacking
+        self.housings = [
+            Pallet(
+                batch_id=h["batch_id"],
+                part_type=h["part_type"],
+                quantity=h["quantity"],
+                timestamp=h.get("timestamp"),
+                fifo_number=h.get("fifo_number")  # Safely returns None if missing
+            ) 
+            for h in (housings or [])
+        ]
+        
+        self.covers = [
+            Pallet(
+                batch_id=c["batch_id"],
+                part_type=c["part_type"],
+                quantity=c["quantity"],
+                timestamp=c.get("timestamp"),
+                fifo_number=c.get("fifo_number")  # Safely returns None if missing
+            ) 
+            for c in (covers or [])
+        ]
 
     @property
     def total_housing_pcs(self) -> int:

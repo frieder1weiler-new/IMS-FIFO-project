@@ -8,16 +8,40 @@
                         "batch_id": "SAP-68980-H",
                         "part_type": "housing",
                         "quantity": 600,
-                        "timestamp": "2026-06-03T22:41:45.943597"
+                        "timestamp": "2026-06-03T22:41:45.943597",
+                        "fifo_number": "1"
                     },
                     {
                         "batch_id": "SAP-59780-H",
                         "part_type": "housing",
                         "quantity": 600,
-                        "timestamp": "2026-06-03T22:41:48.101313"
+                        "timestamp": "2026-06-03T22:41:48.101313",
+                        "fifo_number": "2"
                     }
                 ],
-                "covers": []
+                "covers": [
+                    {
+                        "batch_id": "SAP-22454-C",
+                        "part_type": "cover",
+                        "quantity": 1440,
+                        "timestamp": "2026-06-04T22:07:36.312380",
+                        "fifo_number": "98"
+                    },
+                    {
+                        "batch_id": "SAP-24520-C",
+                        "part_type": "cover",
+                        "quantity": 1440,
+                        "timestamp": "2026-06-04T22:07:38.623295",
+                        "fifo_number": "52"
+                    },
+                    {
+                        "batch_id": "SAP-27268-C",
+                        "part_type": "cover",
+                        "quantity": 1440,
+                        "timestamp": "2026-06-04T22:07:41.050812",
+                        "fifo_number": "304"
+                    }
+                ]
             }
         },
         "HONDA_LH": {
@@ -25,16 +49,32 @@
             "stock": {
                 "housings": [
                     {
-                        "batch_id": "SAP-12191-H",
+                        "batch_id": "SAP-11427-H",
                         "part_type": "housing",
                         "quantity": 500,
-                        "timestamp": "2026-06-03T22:41:40.257356"
+                        "timestamp": "2026-06-04T20:53:59.544650",
+                        "fifo_number": "534"
                     },
                     {
-                        "batch_id": "SAP-33187-H",
+                        "batch_id": "SAP-58216-H",
                         "part_type": "housing",
                         "quantity": 500,
-                        "timestamp": "2026-06-03T22:41:41.205242"
+                        "timestamp": "2026-06-04T20:54:30.817901",
+                        "fifo_number": "593"
+                    },
+                    {
+                        "batch_id": "SAP-93569-H",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-04T21:54:25.981532",
+                        "fifo_number": "560"
+                    },
+                    {
+                        "batch_id": "SAP-10166-H",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-04T21:54:31.914232",
+                        "fifo_number": "4"
                     }
                 ],
                 "covers": [
@@ -42,13 +82,36 @@
                         "batch_id": "SAP-48958-C",
                         "part_type": "cover",
                         "quantity": 1000,
-                        "timestamp": "2026-06-03T22:41:42.583041"
+                        "timestamp": "2026-06-03T22:41:42.583041",
+                        "fifo_number": "1"
                     },
                     {
                         "batch_id": "SAP-38010-C",
                         "part_type": "cover",
                         "quantity": 1000,
-                        "timestamp": "2026-06-03T22:41:43.335216"
+                        "timestamp": "2026-06-03T22:41:43.335216",
+                        "fifo_number": "2"
+                    },
+                    {
+                        "batch_id": "SAP-38054-C",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-04T21:54:09.269959",
+                        "fifo_number": "904"
+                    },
+                    {
+                        "batch_id": "SAP-17039-C",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-04T21:54:10.067513",
+                        "fifo_number": "637"
+                    },
+                    {
+                        "batch_id": "SAP-93120-C",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-04T21:54:10.849010",
+                        "fifo_number": "908"
                     }
                 ]
             }

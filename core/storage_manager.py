@@ -51,7 +51,14 @@ def book_pallet_in(product_id: str, part_type: str, batch_id: str, fifo_number: 
 
     # 4. Load, update, and save via Data Models
     product_stock = get_product_stock(product_id)
-    new_pallet = Pallet(batch_id=batch_id, part_type=part_type, quantity=standard_quantity)
+    assigned_fifo = fifo_number if fifo_number else batch_id
+
+    new_pallet = Pallet(
+        batch_id=batch_id, 
+        part_type=part_type, 
+        quantity=standard_quantity,
+        fifo_number=assigned_fifo  # <-- 04062026 added fifo storage!
+    )
     
     if part_type == "housing":
         product_stock.housings.append(new_pallet)
@@ -59,7 +66,7 @@ def book_pallet_in(product_id: str, part_type: str, batch_id: str, fifo_number: 
         product_stock.covers.append(new_pallet)
         
     save_product_stock(product_stock)
-    return f"Successfully booked pallet {batch_id} with {standard_quantity} pcs."
+    return f"Successfully booked pallet {batch_id} (FIFO #{assigned_fifo}) with {standard_quantity} pcs."
 
 
 def book_pallet_out(batch_id: str) -> str:
