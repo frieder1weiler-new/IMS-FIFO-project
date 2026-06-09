@@ -105,10 +105,13 @@ def api_scan_in():
         record_log("INBOUND", f"Failed Scan Storage: {str(e)}", "ERROR")
         return jsonify({"status": "error", "message": str(e)}), 400
 
+
 @app.route('/api/scan/out', methods=['POST'])
 def api_scan_out():
     data = request.get_json() or {}
     batch_id = data.get('batch_id')
+    # 🎛️ Read the enforcement state from the frontend payload (defaults to False if missing)
+    enforce_fifo = data.get('enforce_fifo', False)
 
     if not batch_id:
         return jsonify({"status": "error", "message": "Missing Batch ID."}), 400
@@ -119,7 +122,7 @@ def api_scan_out():
     target_product = ""
     target_type = ""
 
-    # 🔍 OBJECT MAP FIX: Evaluate FIFO rules safely through get_product_stock() class instances
+    # 🔍 Evaluate FIFO rules safely through get_product_stock() class instances
     for prod_id in active_products.keys():
         try:
             stock_obj = get_product_stock(prod_id)
@@ -132,7 +135,6 @@ def api_scan_out():
                 if not pallets: 
                     continue
                 
-                # Check using object properties instead of string dictionary keys
                 has_batch = any(p.batch_id == batch_id for p in pallets)
                 
                 if has_batch:
@@ -151,9 +153,21 @@ def api_scan_out():
         except ValueError:
             continue
 
+    # 🛑 HARD ENFORCEMENT BLOCK: Reject scan immediately if toggle is on and violation occurred
+    if fifo_violation and enforce_fifo:
+        reject_msg = f"❌ FIFO REJECTION: Scanned {batch_id} for {target_product} {target_type}. MUST use oldest batch: {correct_fifo_batch}."
+        record_log("OUTBOUND", reject_msg, "ERROR")
+        return jsonify({
+            "status": "error",
+            "message": f"FIFO Enforcement Active! Scan rejected. Please locate oldest batch: {correct_fifo_batch}.",
+            "fifo_violation": True,
+            "expected_batch": correct_fifo_batch
+        }), 400  # Return an error status code to trigger UI alarm states
+
     try:
         message = book_pallet_out(batch_id)
         
+        # Soft Warning Block (Enforcement is OFF)
         if fifo_violation:
             warn_msg = f"⚠️ FIFO VIOLATION: Scanned batch {batch_id} for {target_product} {target_type}. An older batch ({correct_fifo_batch}) was available!"
             record_log("OUTBOUND", warn_msg, "ERROR")

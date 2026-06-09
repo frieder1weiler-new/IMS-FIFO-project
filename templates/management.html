@@ -356,7 +356,7 @@
         const feedbackBox = document.getElementById('test-feedback');
         
         const randSeed = Math.floor(10000 + Math.random() * 90000);
-        const generatedBatch = `SAP-${randSeed}-${partType.charAt(0).toUpperCase()}`;
+        const generatedBatch = `00150${randSeed}`;
         const fifoNumber = Math.floor(1 + Math.random() * 999).toString();
 
         showFeedback(feedbackBox, `Simulating hardware input [${generatedBatch}] with FIFO#${fifoNumber}...`, "info");

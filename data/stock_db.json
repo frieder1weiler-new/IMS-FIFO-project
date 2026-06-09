@@ -1,147 +1,176 @@
 {
     "products": {
-        "Honda RH": {
+        "Honda_RH": {
             "name": "Honda RH",
             "stock": {
                 "housings": [
                     {
-                        "batch_id": "SAP-68980-H",
+                        "batch_id": "0015056443",
                         "part_type": "housing",
                         "quantity": 600,
-                        "timestamp": "2026-06-03T22:41:45.943597",
-                        "fifo_number": "1"
-                    },
-                    {
-                        "batch_id": "SAP-59780-H",
-                        "part_type": "housing",
-                        "quantity": 600,
-                        "timestamp": "2026-06-03T22:41:48.101313",
-                        "fifo_number": "2"
+                        "timestamp": "2026-06-08T16:53:29.355196",
+                        "fifo_number": "74"
                     }
                 ],
                 "covers": [
                     {
-                        "batch_id": "SAP-22454-C",
+                        "batch_id": "0015049381",
                         "part_type": "cover",
                         "quantity": 1440,
-                        "timestamp": "2026-06-04T22:07:36.312380",
-                        "fifo_number": "98"
-                    },
-                    {
-                        "batch_id": "SAP-24520-C",
-                        "part_type": "cover",
-                        "quantity": 1440,
-                        "timestamp": "2026-06-04T22:07:38.623295",
-                        "fifo_number": "52"
-                    },
-                    {
-                        "batch_id": "SAP-27268-C",
-                        "part_type": "cover",
-                        "quantity": 1440,
-                        "timestamp": "2026-06-04T22:07:41.050812",
-                        "fifo_number": "304"
+                        "timestamp": "2026-06-09T08:32:55.513734",
+                        "fifo_number": "877"
                     }
                 ]
             }
         },
-        "HONDA_LH": {
+        "Honda_LH": {
             "name": "Honda LH",
             "stock": {
                 "housings": [
                     {
-                        "batch_id": "SAP-11427-H",
+                        "batch_id": "0015043785",
                         "part_type": "housing",
                         "quantity": 500,
-                        "timestamp": "2026-06-04T20:53:59.544650",
-                        "fifo_number": "534"
+                        "timestamp": "2026-06-09T08:32:21.053492",
+                        "fifo_number": "648"
                     },
                     {
-                        "batch_id": "SAP-58216-H",
+                        "batch_id": "0015059967",
                         "part_type": "housing",
                         "quantity": 500,
-                        "timestamp": "2026-06-04T20:54:30.817901",
-                        "fifo_number": "593"
-                    },
-                    {
-                        "batch_id": "SAP-93569-H",
-                        "part_type": "housing",
-                        "quantity": 500,
-                        "timestamp": "2026-06-04T21:54:25.981532",
-                        "fifo_number": "560"
-                    },
-                    {
-                        "batch_id": "SAP-10166-H",
-                        "part_type": "housing",
-                        "quantity": 500,
-                        "timestamp": "2026-06-04T21:54:31.914232",
-                        "fifo_number": "4"
+                        "timestamp": "2026-06-09T08:32:25.856951",
+                        "fifo_number": "766"
                     }
                 ],
                 "covers": [
                     {
-                        "batch_id": "SAP-48958-C",
+                        "batch_id": "0015037888",
                         "part_type": "cover",
                         "quantity": 1000,
-                        "timestamp": "2026-06-03T22:41:42.583041",
-                        "fifo_number": "1"
+                        "timestamp": "2026-06-09T08:32:26.932613",
+                        "fifo_number": "45"
                     },
                     {
-                        "batch_id": "SAP-38010-C",
+                        "batch_id": "0015095877",
                         "part_type": "cover",
                         "quantity": 1000,
-                        "timestamp": "2026-06-03T22:41:43.335216",
-                        "fifo_number": "2"
+                        "timestamp": "2026-06-09T08:32:28.221108",
+                        "fifo_number": "578"
                     },
                     {
-                        "batch_id": "SAP-38054-C",
+                        "batch_id": "0015053893",
                         "part_type": "cover",
                         "quantity": 1000,
-                        "timestamp": "2026-06-04T21:54:09.269959",
-                        "fifo_number": "904"
+                        "timestamp": "2026-06-09T09:08:16.642751",
+                        "fifo_number": "958"
                     },
                     {
-                        "batch_id": "SAP-17039-C",
+                        "batch_id": "0015037315",
                         "part_type": "cover",
                         "quantity": 1000,
-                        "timestamp": "2026-06-04T21:54:10.067513",
-                        "fifo_number": "637"
-                    },
-                    {
-                        "batch_id": "SAP-93120-C",
-                        "part_type": "cover",
-                        "quantity": 1000,
-                        "timestamp": "2026-06-04T21:54:10.849010",
-                        "fifo_number": "908"
+                        "timestamp": "2026-06-09T15:48:24.317027",
+                        "fifo_number": "579"
                     }
                 ]
             }
         },
-        "SUBARU_LH": {
+        "Subaru_LH": {
             "name": "Subaru LH",
             "stock": {
-                "housings": [],
-                "covers": []
+                "housings": [
+                    {
+                        "batch_id": "0015092426",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T08:33:20.196587",
+                        "fifo_number": "298"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015070873",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T08:33:22.494336",
+                        "fifo_number": "415"
+                    },
+                    {
+                        "batch_id": "0015031376",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T08:33:24.818474",
+                        "fifo_number": "549"
+                    }
+                ]
             }
         },
-        "SUBARU_RH": {
+        "Subaru_RH": {
             "name": "Subaru RH",
             "stock": {
-                "housings": [],
-                "covers": []
+                "housings": [
+                    {
+                        "batch_id": "0015022566",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T15:48:07.861079",
+                        "fifo_number": "205"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015078022",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:30.489456",
+                        "fifo_number": "901"
+                    }
+                ]
             }
         },
         "VW_LH": {
             "name": "VW LH",
             "stock": {
-                "housings": [],
-                "covers": []
+                "housings": [
+                    {
+                        "batch_id": "0015018181",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T15:48:10.063344",
+                        "fifo_number": "312"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015049269",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:28.570390",
+                        "fifo_number": "347"
+                    }
+                ]
             }
         },
         "VW_RH": {
             "name": "VW RH",
             "stock": {
-                "housings": [],
-                "covers": []
+                "housings": [
+                    {
+                        "batch_id": "0015023093",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T15:48:11.982350",
+                        "fifo_number": "135"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015093037",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:26.891590",
+                        "fifo_number": "911"
+                    }
+                ]
             }
         }
     }
