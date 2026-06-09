@@ -1,0 +1,177 @@
+{
+    "products": {
+        "Honda_RH": {
+            "name": "Honda RH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "0015056443",
+                        "part_type": "housing",
+                        "quantity": 600,
+                        "timestamp": "2026-06-08T16:53:29.355196",
+                        "fifo_number": "74"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015049381",
+                        "part_type": "cover",
+                        "quantity": 1440,
+                        "timestamp": "2026-06-09T08:32:55.513734",
+                        "fifo_number": "877"
+                    }
+                ]
+            }
+        },
+        "Honda_LH": {
+            "name": "Honda LH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "0015043785",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T08:32:21.053492",
+                        "fifo_number": "648"
+                    },
+                    {
+                        "batch_id": "0015059967",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T08:32:25.856951",
+                        "fifo_number": "766"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015037888",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T08:32:26.932613",
+                        "fifo_number": "45"
+                    },
+                    {
+                        "batch_id": "0015095877",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T08:32:28.221108",
+                        "fifo_number": "578"
+                    },
+                    {
+                        "batch_id": "0015053893",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T09:08:16.642751",
+                        "fifo_number": "958"
+                    },
+                    {
+                        "batch_id": "0015037315",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:24.317027",
+                        "fifo_number": "579"
+                    }
+                ]
+            }
+        },
+        "Subaru_LH": {
+            "name": "Subaru LH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "0015092426",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T08:33:20.196587",
+                        "fifo_number": "298"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015070873",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T08:33:22.494336",
+                        "fifo_number": "415"
+                    },
+                    {
+                        "batch_id": "0015031376",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T08:33:24.818474",
+                        "fifo_number": "549"
+                    }
+                ]
+            }
+        },
+        "Subaru_RH": {
+            "name": "Subaru RH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "0015022566",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T15:48:07.861079",
+                        "fifo_number": "205"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015078022",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:30.489456",
+                        "fifo_number": "901"
+                    }
+                ]
+            }
+        },
+        "VW_LH": {
+            "name": "VW LH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "0015018181",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T15:48:10.063344",
+                        "fifo_number": "312"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015049269",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:28.570390",
+                        "fifo_number": "347"
+                    }
+                ]
+            }
+        },
+        "VW_RH": {
+            "name": "VW RH",
+            "stock": {
+                "housings": [
+                    {
+                        "batch_id": "0015023093",
+                        "part_type": "housing",
+                        "quantity": 500,
+                        "timestamp": "2026-06-09T15:48:11.982350",
+                        "fifo_number": "135"
+                    }
+                ],
+                "covers": [
+                    {
+                        "batch_id": "0015093037",
+                        "part_type": "cover",
+                        "quantity": 1000,
+                        "timestamp": "2026-06-09T15:48:26.891590",
+                        "fifo_number": "911"
+                    }
+                ]
+            }
+        }
+    }
+}

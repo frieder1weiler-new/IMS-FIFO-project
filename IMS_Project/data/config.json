@@ -1,0 +1,53 @@
+{
+    "db_file_path": "data/stock_db.json",
+    "products": {
+        "Honda_RH": {
+            "name": "Honda RH",
+            "is_active": false,
+            "housing_pallet_qty": 600,
+            "cover_pallet_qty": 1440,
+            "min_stock_pcs": 5000,
+            "max_stock_pcs": 20000
+        },
+        "Honda_LH": {
+            "name": "Honda LH",
+            "is_active": true,
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000,
+            "min_stock_pcs": 1000,
+            "max_stock_pcs": 5000
+        },
+        "Subaru_LH": {
+            "name": "Subaru LH",
+            "is_active": true,
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000,
+            "min_stock_pcs": 1000,
+            "max_stock_pcs": 5000
+        },
+        "Subaru_RH": {
+            "name": "Subaru RH",
+            "is_active": false,
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000,
+            "min_stock_pcs": 1000,
+            "max_stock_pcs": 5000
+        },
+        "VW_LH": {
+            "name": "VW LH",
+            "is_active": false,
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000,
+            "min_stock_pcs": 1000,
+            "max_stock_pcs": 5000
+        },
+        "VW_RH": {
+            "name": "VW RH",
+            "is_active": false,
+            "housing_pallet_qty": 500,
+            "cover_pallet_qty": 1000,
+            "min_stock_pcs": 1000,
+            "max_stock_pcs": 5000
+        }
+    }
+}
