@@ -10,6 +10,13 @@
                         "quantity": 600,
                         "timestamp": "2026-06-08T16:53:29.355196",
                         "fifo_number": "74"
+                    },
+                    {
+                        "batch_id": "0015090188",
+                        "part_type": "housing",
+                        "quantity": 600,
+                        "timestamp": "2026-06-17T09:17:39.987497",
+                        "fifo_number": "89"
                     }
                 ],
                 "covers": [
@@ -19,6 +26,13 @@
                         "quantity": 1440,
                         "timestamp": "2026-06-09T08:32:55.513734",
                         "fifo_number": "877"
+                    },
+                    {
+                        "batch_id": "0015055026",
+                        "part_type": "cover",
+                        "quantity": 1440,
+                        "timestamp": "2026-06-17T09:17:47.168150",
+                        "fifo_number": "50"
                     }
                 ]
             }

@@ -3,7 +3,7 @@
     "products": {
         "Honda_RH": {
             "name": "Honda RH",
-            "is_active": false,
+            "is_active": true,
             "housing_pallet_qty": 600,
             "cover_pallet_qty": 1440,
             "min_stock_pcs": 5000,
