@@ -1,0 +1,3 @@
+2026-07-20 10:25:01,095 INFO ims_fifo Inbound scan payload received: product=Honda_RH part=housing batch=TEST-XYZ-1234 fifo=999
+2026-07-20 11:56:21,637 INFO ims_fifo Inbound scan payload received: product=Honda_LH part=housing batch=0015062162 fifo=917
+2026-07-20 11:56:37,923 INFO ims_fifo Inbound scan payload received: product=Honda_LH part=housing batch=0015036531 fifo=364
