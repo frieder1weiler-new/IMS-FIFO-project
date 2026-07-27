@@ -256,7 +256,10 @@
                 subText.innerText = "Scan Product Label (Inbound) or Batch Code (Outbound)";
             }
 
-            evaluatelayoutState();
+            evaluatelayoutState(forceHudView);
+            if (fifoHudToggle) {
+                fifoHudToggle.checked = forceHudView;
+            }
         }
 
         function startInboundWatchdog() {
